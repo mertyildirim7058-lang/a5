@@ -3,307 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>AI Asistan</title>
+    <title>AI Asistan & Canvas</title>
     <style>
-        /* Modern AI Teması Renk Paleti */
         :root {
-            --bg-main: #f0f4f9;
-            --bg-sidebar: #e9eef6;
-            --bg-chat: #ffffff;
-            --text-main: #1f1f1f;
-            --text-muted: #444746;
-            --user-bubble: #e3e3e3;
-            --accent-color: #0b57d0;
-            --accent-hover: #0842a0;
-            --input-bg: #ffffff;
-            --border-color: #c4c7c5;
+            --bg-main: #f0f4f9; --bg-sidebar: #e9eef6; --bg-chat: #ffffff;
+            --text-main: #1f1f1f; --text-muted: #444746; --user-bubble: #e3e3e3;
+            --accent-color: #0b57d0; --input-bg: #ffffff; --border-color: #c4c7c5;
         }
-
         [data-theme="dark"] {
-            --bg-main: #131314;
-            --bg-sidebar: #1e1f20;
-            --bg-chat: #131314;
-            --text-main: #e3e3e3;
-            --text-muted: #c4c7c5;
-            --user-bubble: #333537;
-            --accent-color: #a8c7fa;
-            --accent-hover: #7cb0f9;
-            --input-bg: #1e1f20;
-            --border-color: #444746;
+            --bg-main: #131314; --bg-sidebar: #1e1f20; --bg-chat: #131314;
+            --text-main: #e3e3e3; --text-muted: #c4c7c5; --user-bubble: #333537;
+            --accent-color: #a8c7fa; --input-bg: #1e1f20; --border-color: #444746;
         }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, sans-serif; transition: background-color 0.3s; }
+        body { background-color: var(--bg-main); color: var(--text-main); height: 100vh; display: flex; overflow: hidden; }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            transition: background-color 0.3s, color 0.3s;
-        }
+        /* Sidebar */
+        .sidebar { width: 280px; background: var(--bg-sidebar); display: flex; flex-direction: column; padding: 20px; border-right: 1px solid var(--border-color); }
+        .btn { background: var(--bg-chat); color: var(--text-main); border: 1px solid var(--border-color); padding: 12px; border-radius: 50px; cursor: pointer; margin-bottom: 10px; display: flex; align-items: center; justify-content: center; gap: 10px; }
+        .theme-btn { margin-top: auto; background: transparent; border: none; }
 
-        body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-            height: 100vh;
-            display: flex;
-            overflow: hidden;
-        }
-
-        /* --- YAN MENÜ (SİDEBAR) --- */
-        .sidebar {
-            width: 280px;
-            background-color: var(--bg-sidebar);
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-            border-right: 1px solid var(--border-color);
-            transition: transform 0.3s ease;
-        }
-
-        .new-chat-btn {
-            background-color: var(--bg-chat);
-            color: var(--text-main);
-            border: 1px solid var(--border-color);
-            padding: 12px 20px;
-            border-radius: 50px;
-            cursor: pointer;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-size: 0.95rem;
-            margin-bottom: 20px;
-        }
-
-        .new-chat-btn:hover { background-color: var(--border-color); }
-
-        .history-list {
-            flex: 1;
-            overflow-y: auto;
-        }
-
-        .theme-btn {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            cursor: pointer;
-            padding: 10px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            border-radius: 8px;
-        }
-        .theme-btn:hover { background-color: rgba(0,0,0,0.05); }
-        [data-theme="dark"] .theme-btn:hover { background-color: rgba(255,255,255,0.05); }
-
-        /* --- ANA İÇERİK ALANI --- */
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            background-color: var(--bg-chat);
-        }
-
-        .top-nav {
-            padding: 15px 20px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .hamburger {
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-size: 1.5rem;
-            cursor: pointer;
-            display: none; /* Mobilde açılacak */
-        }
-
-        .brand { font-size: 1.2rem; font-weight: 500; color: var(--text-muted); }
-
-        /* --- SOHBET ALANI --- */
-        .chat-container {
-            flex: 1;
-            overflow-y: auto;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        .chat-box {
-            width: 100%;
-            max-width: 800px; /* Okunabilir maksimum genişlik */
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            padding-bottom: 20px;
-        }
-
-        .message-row {
-            display: flex;
-            width: 100%;
-            animation: fadeIn 0.4s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* Kullanıcı Mesajı: Sağda, Balon İçinde */
+        /* Main */
+        .main-content { flex: 1; display: flex; flex-direction: column; background: var(--bg-chat); position: relative; }
+        .top-nav { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border-color); }
+        
+        /* Workspace (Chat + Canvas) */
+        .workspace { display: flex; flex: 1; overflow: hidden; }
+        .chat-container { flex: 1; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; align-items: center; }
+        .chat-box { width: 100%; max-width: 800px; display: flex; flex-direction: column; gap: 20px; }
+        
+        /* Messages */
+        .message-row { display: flex; width: 100%; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
         .user-row { justify-content: flex-end; }
-        .user-row .message {
-            background-color: var(--user-bubble);
-            padding: 12px 20px;
-            border-radius: 24px;
-            max-width: 80%;
-            font-size: 1rem;
-            line-height: 1.5;
-        }
+        .user-row .message { background: var(--user-bubble); padding: 12px 20px; border-radius: 24px; max-width: 80%; }
+        .bot-row { gap: 15px; }
+        .bot-avatar { width: 36px; height: 36px; background: linear-gradient(135deg, #0b57d0, #a8c7fa); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; }
+        .bot-row .message { max-width: 90%; padding-top: 5px; line-height: 1.5; }
 
-        /* Bot Mesajı: Solda, Şeffaf Arka Plan, İkonlu */
-        .bot-row { justify-content: flex-start; gap: 15px; }
-        .bot-avatar {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(135deg, #0b57d0, #a8c7fa);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            flex-shrink: 0;
-            font-size: 1.2rem;
-        }
-        .bot-row .message {
-            max-width: 90%;
-            font-size: 1rem;
-            line-height: 1.6;
-            padding-top: 5px;
-        }
+        /* Canvas */
+        .canvas-container { width: 0; display: none; flex-direction: column; border-left: 1px solid var(--border-color); background: var(--bg-main); transition: width 0.3s; }
+        .canvas-container.active { width: 50%; display: flex; }
+        canvas { flex: 1; cursor: crosshair; touch-action: none; background: transparent; }
+        .canvas-tools { padding: 10px; display: flex; gap: 10px; border-bottom: 1px solid var(--border-color); }
+        .c-btn { padding: 5px 10px; border-radius: 5px; border: 1px solid var(--border-color); background: var(--bg-chat); color: var(--text-main); cursor: pointer;}
 
-        /* --- GİRİŞ ALANI --- */
-        .input-container {
-            padding: 20px;
-            display: flex;
-            justify-content: center;
-            background: linear-gradient(to top, var(--bg-chat) 70%, transparent);
-        }
+        /* Input */
+        .input-container { padding: 20px; display: flex; justify-content: center; background: var(--bg-chat); border-top: 1px solid var(--border-color); }
+        .input-box { width: 100%; max-width: 800px; background: var(--input-bg); border: 1px solid var(--border-color); border-radius: 30px; display: flex; align-items: flex-end; padding: 10px 15px; }
+        textarea { flex: 1; background: transparent; border: none; color: var(--text-main); padding: 10px; outline: none; resize: none; max-height: 120px; }
+        .icon-btn { background: transparent; border: none; color: var(--accent-color); font-size: 1.5rem; padding: 10px; cursor: pointer; }
+        .icon-btn.recording { color: red; animation: pulse 1s infinite; }
+        @keyframes pulse { 50% { opacity: 0.5; transform: scale(1.1); } }
 
-        .input-box {
-            width: 100%;
-            max-width: 800px;
-            background-color: var(--input-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 30px;
-            display: flex;
-            align-items: flex-end;
-            padding: 10px 15px;
-            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
-        }
-
-        textarea {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text-main);
-            font-size: 1rem;
-            padding: 10px;
-            resize: none;
-            outline: none;
-            max-height: 150px;
-            min-height: 24px;
-            overflow-y: auto;
-        }
-
-        .send-btn {
-            background: transparent;
-            border: none;
-            color: var(--accent-color);
-            font-size: 1.5rem;
-            padding: 10px;
-            cursor: pointer;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .send-btn:hover { background-color: rgba(0,0,0,0.05); }
-        .send-btn:disabled { color: var(--text-muted); cursor: not-allowed; }
-
-        /* Yazıyor Animasyonu */
-        .typing-indicator { display: none; align-items: center; gap: 5px; padding-top: 10px; }
-        .typing-indicator span {
-            width: 8px; height: 8px; background: var(--text-muted); border-radius: 50%;
-            animation: bounce 1.4s infinite ease-in-out;
-        }
-        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes bounce { 0%, 80%, 100% { transform: scale(0); } 40% { transform: scale(1); } }
-
-        /* --- MOBİL UYUM (RESPONSIVE) --- */
-        @media (max-width: 768px) {
-            .sidebar {
-                position: absolute;
-                z-index: 100;
-                height: 100%;
-                transform: translateX(-100%);
-                width: 250px;
-            }
-            .sidebar.active { transform: translateX(0); box-shadow: 2px 0 10px rgba(0,0,0,0.2); }
-            .top-nav .hamburger { display: block; }
-            .bot-row .message { max-width: 100%; }
-            .input-box { border-radius: 20px; }
-        }
+        @media (max-width: 768px) { .sidebar { display: none; } .canvas-container.active { position: absolute; width: 100%; height: 100%; top: 0; left: 0; } }
     </style>
 </head>
 <body>
 
 <div class="sidebar" id="sidebar">
-    <button class="new-chat-btn" onclick="clearChat()">
-        ➕ Yeni Sohbet
-    </button>
-    <div class="history-list">
-        </div>
-    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">
-        🌓 Temayı Değiştir
-    </button>
+    <button class="btn" onclick="clearChat()">➕ Yeni Sohbet</button>
+    <button class="btn theme-btn" onclick="toggleTheme()">🌓 Tema Değiştir</button>
 </div>
 
 <div class="main-content">
     <div class="top-nav">
-        <button class="hamburger" onclick="toggleSidebar()">☰</button>
-        <span class="brand">✨ AI Asistan</span>
-        <div style="width: 24px;"></div> </div>
+        <span style="font-weight: 500;">✨ AI Asistan</span>
+        <button class="c-btn" onclick="toggleCanvas()">🎨 Çizim Tahtası</button>
+    </div>
 
-    <div class="chat-container" id="scrollArea">
-        <div class="chat-box" id="chatBox">
-            <div class="message-row bot-row">
-                <div class="bot-avatar">✨</div>
-                <div class="message">Merhaba! Bugün sana nasıl yardımcı olabilirim?</div>
-            </div>
-            
-            <div class="message-row bot-row" id="typingRow" style="display: none;">
-                <div class="bot-avatar">✨</div>
-                <div class="typing-indicator">
-                    <span></span><span></span><span></span>
+    <div class="workspace">
+        <div class="chat-container" id="scrollArea">
+            <div class="chat-box" id="chatBox">
+                <div class="message-row bot-row">
+                    <div class="bot-avatar">✨</div><div class="message">Merhaba! Dinliyorum veya yazabilirsiniz.</div>
+                </div>
+                <div class="message-row bot-row" id="typingRow" style="display: none;">
+                    <div class="bot-avatar">✨</div><div class="message">...</div>
                 </div>
             </div>
+        </div>
+
+        <div class="canvas-container" id="canvasPanel">
+            <div class="canvas-tools">
+                <button class="c-btn" onclick="ctx.clearRect(0,0,canvas.width,canvas.height)">🗑️ Temizle</button>
+                <button class="c-btn" onclick="toggleCanvas()">❌ Kapat</button>
+            </div>
+            <canvas id="canvas"></canvas>
         </div>
     </div>
 
     <div class="input-container">
         <div class="input-box">
-            <textarea 
-                id="userInput" 
-                rows="1" 
-                placeholder="Mesajınızı buraya yazın..." 
-                oninput="autoResize(this)"
-                onkeydown="handleKeyPress(event)"
-            ></textarea>
-            <button class="send-btn" id="sendBtn" onclick="sendMessage()">➤</button>
+            <button class="icon-btn" id="micBtn" onclick="toggleMic()">🎤</button>
+            <textarea id="userInput" rows="1" placeholder="Mesajınız..." oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px';" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendMessage();}"></textarea>
+            <button class="icon-btn" id="sendBtn" onclick="sendMessage()">➤</button>
         </div>
     </div>
 </div>
@@ -311,146 +105,70 @@
 <script>
     const webhookUrl = "https://mekanikai-n8n.hf.space/webhook/9e29da52-df43-4d7a-a240-7abe603e95da";
 
-    // Tema Ayarları
-    function initTheme() {
-        const savedTheme = localStorage.getItem('theme') || 'dark';
-        document.body.setAttribute('data-theme', savedTheme);
-    }
-
+    // 1. TEMA VE CHAT
+    if(localStorage.getItem('theme')==='light') document.body.setAttribute('data-theme', 'light');
     function toggleTheme() {
-        const currentTheme = document.body.getAttribute('data-theme');
-        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-        document.body.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        const t = document.body.getAttribute('data-theme') === 'light' ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', t); localStorage.setItem('theme', t);
     }
-
-    // Mobil Menü Aç/Kapat
-    function toggleSidebar() {
-        document.getElementById('sidebar').classList.toggle('active');
-    }
-
-    // Textarea otomatik boyutlandırma (Enter'a basınca genişlemesi için)
-    function autoResize(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-    // Arayüze Mesaj Ekleme
-    function appendMessage(sender, text) {
-        const chatBox = document.getElementById("chatBox");
-        const typingRow = document.getElementById("typingRow");
-        
-        const rowDiv = document.createElement("div");
-        rowDiv.className = `message-row ${sender === 'user' ? 'user-row' : 'bot-row'}`;
-        
-        if (sender === 'bot') {
-            rowDiv.innerHTML = `
-                <div class="bot-avatar">✨</div>
-                <div class="message">${formatText(text)}</div>
-            `;
-        } else {
-            rowDiv.innerHTML = `<div class="message">${text}</div>`;
-        }
-
-        chatBox.insertBefore(rowDiv, typingRow);
-        scrollToBottom();
-    }
-
-    // Basit metin formatlama (Satır atlamalarını HTML'e çevirme)
-    function formatText(text) {
-        return text.replace(/\n/g, '<br>');
-    }
-
-    function scrollToBottom() {
-        const scrollArea = document.getElementById("scrollArea");
-        scrollArea.scrollTo({ top: scrollArea.scrollHeight, behavior: 'smooth' });
-    }
-
-    function setWaitState(isWaiting) {
-        const input = document.getElementById('userInput');
-        const btn = document.getElementById('sendBtn');
-        const typing = document.getElementById('typingRow');
-        
-        input.disabled = isWaiting;
-        btn.disabled = isWaiting;
-        typing.style.display = isWaiting ? 'flex' : 'none';
-        
-        if (isWaiting) scrollToBottom();
-        else {
-            input.focus();
-            input.style.height = 'auto'; // Textarea'yı sıfırla
-        }
+    
+    function appendMsg(sender, text) {
+        const box = document.getElementById("chatBox");
+        const row = document.createElement("div");
+        row.className = `message-row ${sender}-row`;
+        row.innerHTML = sender === 'bot' ? `<div class="bot-avatar">✨</div><div class="message">${text.replace(/\n/g, '<br>')}</div>` : `<div class="message">${text}</div>`;
+        box.insertBefore(row, document.getElementById("typingRow"));
+        document.getElementById("scrollArea").scrollTop = document.getElementById("scrollArea").scrollHeight;
     }
 
     async function sendMessage() {
         const input = document.getElementById("userInput");
-        const message = input.value.trim();
+        const msg = input.value.trim();
+        if (!msg) return;
+        appendMsg("user", msg); input.value = ""; input.style.height = 'auto';
+        document.getElementById("typingRow").style.display = "flex";
         
-        if (!message) return;
-
-        appendMessage("user", message);
-        input.value = "";
-        
-        setWaitState(true);
-
         try {
-            const fetchUrl = `${webhookUrl}?message=${encodeURIComponent(message)}`;
-            
-            const response = await fetch(fetchUrl, {
-                method: 'GET'
-            });
+            const res = await fetch(`${webhookUrl}?message=${encodeURIComponent(msg)}`);
+            let data = res.ok ? await res.text() : "HTTP Hata";
+            appendMsg("bot", data.replace(/<think>[\s\S]*?<\/think>\n*/g, '').trim());
+        } catch { appendMsg("bot", "Bağlantı hatası."); }
+        document.getElementById("typingRow").style.display = "none";
+    }
+    function clearChat() { document.getElementById("chatBox").innerHTML = '<div class="message-row bot-row" id="typingRow" style="display:none;"><div class="bot-avatar">✨</div><div class="message">...</div></div>'; appendMsg('bot', 'Sohbet temizlendi.'); }
 
-            if (response.ok) {
-                let data = await response.text();
-                
-                // <think> ETİKETLERİNİ TEMİZLEYEN FİLTRE (Önceki talebiniz)
-                data = data.replace(/<think>[\s\S]*?<\/think>\n*/g, '').trim();
-
-                appendMessage("bot", data ? data : "İşlem tamamlandı.");
-            } else {
-                appendMessage("bot", `Hata: HTTP ${response.status}`);
-            }
-        } catch (error) {
-            appendMessage("bot", `Bağlantı kurulamadı. Webhook adresini kontrol edin.`);
-        } finally {
-            setWaitState(false);
-        }
+    // 2. MİKROFON (SES TANIMA)
+    let recognition, isRec = false;
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+        recognition.lang = 'tr-TR';
+        recognition.onresult = e => { document.getElementById("userInput").value = e.results[0][0].transcript; sendMessage(); };
+        recognition.onend = () => { isRec = false; document.getElementById("micBtn").classList.remove("recording"); };
+    }
+    function toggleMic() {
+        if (!recognition) return alert("Tarayıcı desteklemiyor.");
+        if (isRec) recognition.stop(); else { recognition.start(); isRec = true; document.getElementById("micBtn").classList.add("recording"); }
     }
 
-    function handleKeyPress(event) {
-        // Sadece Enter'a basılırsa (Shift+Enter alt satıra geçer)
-        if (event.key === "Enter" && !event.shiftKey) {
-            event.preventDefault();
-            if (!document.getElementById('sendBtn').disabled) {
-                sendMessage();
-            }
-        }
+    // 3. CANVAS (ÇİZİM)
+    const canvas = document.getElementById('canvas'), ctx = canvas.getContext('2d');
+    let isDrawing = false;
+    function toggleCanvas() { 
+        const p = document.getElementById('canvasPanel'); 
+        p.classList.toggle('active'); 
+        if(p.classList.contains('active')) { canvas.width = p.clientWidth; canvas.height = p.clientHeight - 50; }
     }
-
-    function clearChat() {
-        const chatBox = document.getElementById("chatBox");
-        const typingRow = document.getElementById("typingRow");
-        
-        chatBox.innerHTML = '';
-        
-        // Karşılama mesajını ve typing indicator'ı geri ekle
-        chatBox.innerHTML = `
-            <div class="message-row bot-row">
-                <div class="bot-avatar">✨</div>
-                <div class="message">Yeni bir sohbet başlattınız. Size nasıl yardımcı olabilirim?</div>
-            </div>
-        `;
-        chatBox.appendChild(typingRow);
-        
-        // Mobilde menüyü kapat
-        document.getElementById('sidebar').classList.remove('active');
+    function drawPos(e) { const r = canvas.getBoundingClientRect(); return { x: (e.clientX||e.touches[0].clientX)-r.left, y: (e.clientY||e.touches[0].clientY)-r.top }; }
+    function startDraw(e) { e.preventDefault(); isDrawing = true; draw(e); }
+    function endDraw() { isDrawing = false; ctx.beginPath(); }
+    function draw(e) {
+        if(!isDrawing) return; e.preventDefault();
+        const p = drawPos(e);
+        ctx.lineWidth = 3; ctx.lineCap = 'round'; ctx.strokeStyle = document.body.getAttribute('data-theme')==='light'?'#000':'#fff';
+        ctx.lineTo(p.x, p.y); ctx.stroke(); ctx.beginPath(); ctx.moveTo(p.x, p.y);
     }
-
-    window.onload = () => {
-        initTheme();
-        document.getElementById('userInput').focus();
-    };
+    canvas.addEventListener('mousedown', startDraw); canvas.addEventListener('mouseup', endDraw); canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('touchstart', startDraw, {passive:false}); canvas.addEventListener('touchend', endDraw); canvas.addEventListener('touchmove', draw, {passive:false});
 </script>
-
 </body>
 </html>
