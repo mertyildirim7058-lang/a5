@@ -3,158 +3,344 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sohbet Arayüzü</title>
+    <title>Gelişmiş Asistan</title>
     <style>
+        /* CSS Değişkenleri (Tema Yönetimi İçin) */
+        :root {
+            --bg-color: #f0f2f5;
+            --chat-container-bg: #ffffff;
+            --header-bg: #005c4b;
+            --header-text: #ffffff;
+            --chat-bg: #efeae2;
+            --user-msg-bg: #d9fdd3;
+            --user-msg-text: #111b21;
+            --bot-msg-bg: #ffffff;
+            --bot-msg-text: #111b21;
+            --input-area-bg: #f0f2f5;
+            --input-bg: #ffffff;
+            --input-text: #111b21;
+            --border-color: #d1d7db;
+            --button-bg: #00a884;
+            --button-hover: #008f6f;
+        }
+
+        [data-theme="dark"] {
+            --bg-color: #111b21;
+            --chat-container-bg: #222e35;
+            --header-bg: #202c33;
+            --header-text: #e9edef;
+            --chat-bg: #0b141a;
+            --user-msg-bg: #005c4b;
+            --user-msg-text: #e9edef;
+            --bot-msg-bg: #202c33;
+            --bot-msg-text: #e9edef;
+            --input-area-bg: #202c33;
+            --input-bg: #2a3942;
+            --input-text: #e9edef;
+            --border-color: #222e35;
+            --button-bg: #00a884;
+            --button-hover: #029071;
+        }
+
+        * {
+            box-sizing: border-box;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             display: flex;
             justify-content: center;
             align-items: center;
             height: 100vh;
-            background-color: #f4f7f6;
+            background-color: var(--bg-color);
             margin: 0;
         }
+
         .chat-container {
-            width: 400px;
-            background: #ffffff;
-            border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+            height: 85vh;
+            background: var(--chat-container-bg);
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             display: flex;
             flex-direction: column;
             overflow: hidden;
         }
+
         .chat-header {
-            background: #007bff;
-            color: white;
-            padding: 15px;
-            text-align: center;
-            font-weight: bold;
+            background: var(--header-bg);
+            color: var(--header-text);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
             font-size: 1.1em;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            z-index: 10;
         }
+
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: var(--header-text);
+            padding: 5px 10px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
         .chat-box {
-            height: 400px;
-            padding: 15px;
+            flex: 1;
+            padding: 20px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 10px;
-            background: #fafafa;
+            gap: 15px;
+            background: var(--chat-bg);
         }
+
+        /* Scrollbar Ayarları */
+        .chat-box::-webkit-scrollbar {
+            width: 6px;
+        }
+        .chat-box::-webkit-scrollbar-thumb {
+            background: rgba(0,0,0,0.2);
+            border-radius: 3px;
+        }
+        [data-theme="dark"] .chat-box::-webkit-scrollbar-thumb {
+            background: rgba(255,255,255,0.2);
+        }
+
         .message {
             padding: 10px 15px;
-            border-radius: 15px;
-            max-width: 75%;
+            border-radius: 10px;
+            max-width: 80%;
             word-wrap: break-word;
             font-size: 0.95em;
+            line-height: 1.4;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+            animation: fadeIn 0.3s ease;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .user {
-            background: #007bff;
-            color: white;
+            background: var(--user-msg-bg);
+            color: var(--user-msg-text);
             align-self: flex-end;
-            border-bottom-right-radius: 2px;
+            border-top-right-radius: 0;
         }
+
         .bot {
-            background: #e2e8f0;
-            color: #333;
+            background: var(--bot-msg-bg);
+            color: var(--bot-msg-text);
             align-self: flex-start;
-            border-bottom-left-radius: 2px;
+            border-top-left-radius: 0;
         }
+
         .input-area {
             display: flex;
             padding: 15px;
-            background: #ffffff;
-            border-top: 1px solid #eee;
+            background: var(--input-area-bg);
+            border-top: 1px solid var(--border-color);
+            gap: 10px;
         }
+
         input {
             flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 20px;
+            padding: 12px 15px;
+            border: 1px solid var(--border-color);
+            border-radius: 25px;
             outline: none;
-            padding-left: 15px;
+            background: var(--input-bg);
+            color: var(--input-text);
+            font-size: 0.95em;
         }
+
         input:focus {
-            border-color: #007bff;
+            border-color: var(--button-bg);
         }
-        button {
-            margin-left: 10px;
-            padding: 10px 20px;
-            background: #007bff;
+
+        button.send-btn {
+            padding: 0 20px;
+            background: var(--button-bg);
             color: white;
             border: none;
-            border-radius: 20px;
+            border-radius: 25px;
             cursor: pointer;
-            font-weight: bold;
-            transition: background 0.3s;
+            font-weight: 600;
         }
-        button:hover {
-            background: #0056b3;
+
+        button.send-btn:hover {
+            background: var(--button-hover);
+        }
+
+        button.send-btn:disabled, input:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Yazıyor Animasyonu */
+        .typing-indicator {
+            display: none;
+            align-self: flex-start;
+            background: var(--bot-msg-bg);
+            padding: 10px 15px;
+            border-radius: 10px;
+            border-top-left-radius: 0;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        }
+
+        .typing-indicator span {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            background-color: #888;
+            border-radius: 50%;
+            margin: 0 2px;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
 
 <div class="chat-container">
-    <div class="chat-header">Asistan</div>
-    <div class="chat-box" id="chatBox">
-        <div class="message bot">Merhaba! Sistem hazır, mesajınızı yazabilirsiniz.</div>
+    <div class="chat-header">
+        <span>🤖 Asistan</span>
+        <button class="theme-toggle" onclick="toggleTheme()" id="themeBtn">🌙 Dark</button>
     </div>
+    
+    <div class="chat-box" id="chatBox">
+        <div class="message bot">Merhaba! Sistem hazır, size nasıl yardımcı olabilirim?</div>
+        
+        <!-- Yazıyor Efekti -->
+        <div class="typing-indicator" id="typingIndicator">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+    
     <div class="input-area">
         <input type="text" id="userInput" placeholder="Mesajınızı yazın..." onkeypress="handleKeyPress(event)">
-        <button onclick="sendMessage()">Gönder</button>
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">Gönder</button>
     </div>
 </div>
 
 <script>
-    // Hedef Webhook URL'niz
+    // Kullanıcının Webhook URL'si
     const webhookUrl = "https://mekanikai-n8n.hf.space/webhook/9e29da52-df43-4d7a-a240-7abe603e95da";
 
+    // Tema Yönetimi
+    function initTheme() {
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
+        updateThemeButton(savedTheme);
+    }
+
+    function toggleTheme() {
+        const currentTheme = document.body.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.body.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeButton(newTheme);
+    }
+
+    function updateThemeButton(theme) {
+        const btn = document.getElementById('themeBtn');
+        btn.innerText = theme === 'light' ? '🌙 Dark' : '☀️ Light';
+    }
+
+    // Mesaj Ekleme Fonksiyonu
     function appendMessage(sender, text) {
         const chatBox = document.getElementById("chatBox");
+        const typingIndicator = document.getElementById("typingIndicator");
         const msgDiv = document.createElement("div");
         msgDiv.className = `message ${sender}`;
         msgDiv.innerText = text;
-        chatBox.appendChild(msgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
+        
+        // Yeni mesajı her zaman "yazıyor..." göstergesinden önce ekle
+        chatBox.insertBefore(msgDiv, typingIndicator);
+        scrollToBottom();
     }
 
+    // Ekranı Yumuşakça Aşağı Kaydırma
+    function scrollToBottom() {
+        const chatBox = document.getElementById("chatBox");
+        chatBox.scrollTo({
+            top: chatBox.scrollHeight,
+            behavior: 'smooth'
+        });
+    }
+
+    // UI Durum Yönetimi (Bekleme Sırasında)
+    function setWaitState(isWaiting) {
+        document.getElementById('userInput').disabled = isWaiting;
+        document.getElementById('sendBtn').disabled = isWaiting;
+        document.getElementById('typingIndicator').style.display = isWaiting ? 'block' : 'none';
+        if (isWaiting) scrollToBottom();
+        else document.getElementById('userInput').focus();
+    }
+
+    // Mesaj Gönderme
     async function sendMessage() {
         const input = document.getElementById("userInput");
         const message = input.value.trim();
         
         if (!message) return;
 
-        // Kullanıcı mesajını arayüze ekle
         appendMessage("user", message);
         input.value = "";
+        
+        setWaitState(true);
 
         try {
-            // GET isteği olduğu için mesajı URL'ye query parametresi olarak ekliyoruz
             const fetchUrl = `${webhookUrl}?message=${encodeURIComponent(message)}`;
             
-            // Webhook'a GET isteği atma
             const response = await fetch(fetchUrl, {
-                method: 'GET',
-                // Eğer webhook'unuzun CORS politikası farklıysa 'mode: no-cors' eklemeniz gerekebilir.
+                method: 'GET'
             });
 
             if (response.ok) {
-                // Sunucudan gelen yanıtı bot mesajı olarak göster
                 const data = await response.text();
                 appendMessage("bot", data ? data : "İstek başarıyla iletildi (Yanıt boş).");
             } else {
-                appendMessage("bot", `Sunucu Hatası: ${response.status}`);
+                appendMessage("bot", `Sunucu Hatası: HTTP ${response.status}`);
             }
         } catch (error) {
-            appendMessage("bot", `Bağlantı Hatası: Webhook'a ulaşılamadı. (${error.message})`);
+            appendMessage("bot", `Bağlantı Hatası: Webhook'a ulaşılamadı. Lütfen CORS ayarlarını kontrol edin.`);
+        } finally {
+            setWaitState(false);
         }
     }
 
     function handleKeyPress(event) {
-        if (event.key === "Enter") {
+        if (event.key === "Enter" && !document.getElementById('sendBtn').disabled) {
             sendMessage();
         }
     }
+
+    // Sayfa yüklendiğinde temayı ayarla ve inputa odaklan
+    window.onload = () => {
+        initTheme();
+        document.getElementById('userInput').focus();
+    };
 </script>
 
 </body>
