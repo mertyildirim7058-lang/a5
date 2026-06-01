@@ -112,11 +112,15 @@
         document.body.setAttribute('data-theme', t); localStorage.setItem('theme', t);
     }
     
+    // HTML etiketlerini güvenli metne çeviren filtre
+    const escapeHTML = str => str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    
     function appendMsg(sender, text) {
         const box = document.getElementById("chatBox");
         const row = document.createElement("div");
         row.className = `message-row ${sender}-row`;
-        row.innerHTML = sender === 'bot' ? `<div class="bot-avatar">✨</div><div class="message">${text.replace(/\n/g, '<br>')}</div>` : `<div class="message">${text}</div>`;
+        const safeText = escapeHTML(text).replace(/\n/g, '<br>');
+        row.innerHTML = sender === 'bot' ? `<div class="bot-avatar">✨</div><div class="message">${safeText}</div>` : `<div class="message">${safeText}</div>`;
         box.insertBefore(row, document.getElementById("typingRow"));
         document.getElementById("scrollArea").scrollTop = document.getElementById("scrollArea").scrollHeight;
     }
@@ -130,11 +134,20 @@
         
         try {
             const res = await fetch(`${webhookUrl}?message=${encodeURIComponent(msg)}`);
-            let data = res.ok ? await res.text() : "HTTP Hata";
-            appendMsg("bot", data.replace(/<think>[\s\S]*?<\/think>\n*/g, '').trim());
+            let rawData = res.ok ? await res.text() : "HTTP Hata";
+            let finalData = rawData;
+            
+            // JSON formatını ve <think> etiketlerini temizle
+            try { 
+                const j = JSON.parse(rawData); 
+                finalData = (Array.isArray(j) && j[0]?.output) ? j[0].output : (j.output || rawData); 
+            } catch (e) {}
+            
+            appendMsg("bot", finalData.replace(/<think>[\s\S]*?<\/think>\n*/g, '').trim());
         } catch { appendMsg("bot", "Bağlantı hatası."); }
         document.getElementById("typingRow").style.display = "none";
     }
+    
     function clearChat() { document.getElementById("chatBox").innerHTML = '<div class="message-row bot-row" id="typingRow" style="display:none;"><div class="bot-avatar">✨</div><div class="message">...</div></div>'; appendMsg('bot', 'Sohbet temizlendi.'); }
 
     // 2. MİKROFON (SES TANIMA)
